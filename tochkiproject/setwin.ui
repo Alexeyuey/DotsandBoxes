@@ -13,61 +13,76 @@
   <property name="windowTitle">
    <string>Настройки</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true">background-color: rgb(85, 255, 255);</string>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QPushButton" name="back">
     <property name="geometry">
      <rect>
       <x>10</x>
       <y>10</y>
-      <width>81</width>
-      <height>71</height>
+      <width>91</width>
+      <height>81</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <pointsize>12</pointsize>
+      <family>HERMAN</family>
+      <pointsize>20</pointsize>
      </font>
     </property>
     <property name="text">
-     <string>Назад</string>
+     <string>Back</string>
+    </property>
+    <property name="flat">
+     <bool>true</bool>
     </property>
    </widget>
    <widget class="QPushButton" name="volbut">
     <property name="geometry">
      <rect>
-      <x>280</x>
-      <y>170</y>
-      <width>241</width>
-      <height>71</height>
+      <x>190</x>
+      <y>180</y>
+      <width>431</width>
+      <height>121</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <pointsize>26</pointsize>
+      <family>HERMAN</family>
+      <pointsize>40</pointsize>
      </font>
     </property>
     <property name="text">
-     <string>Звук</string>
+     <string>Sounds</string>
+    </property>
+    <property name="flat">
+     <bool>true</bool>
     </property>
    </widget>
    <widget class="QPushButton" name="cleartr">
     <property name="geometry">
      <rect>
-      <x>280</x>
-      <y>300</y>
-      <width>241</width>
-      <height>71</height>
+      <x>190</x>
+      <y>320</y>
+      <width>431</width>
+      <height>111</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <pointsize>11</pointsize>
+      <family>HERMAN</family>
+      <pointsize>40</pointsize>
       <weight>50</weight>
       <bold>false</bold>
      </font>
     </property>
     <property name="text">
-     <string>Очистить таблицу рекордов</string>
+     <string>Clear Rating</string>
+    </property>
+    <property name="flat">
+     <bool>true</bool>
     </property>
    </widget>
   </widget>
