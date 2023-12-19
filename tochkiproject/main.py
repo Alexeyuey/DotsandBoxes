@@ -141,6 +141,7 @@ class TableRate(QMainWindow):
 class DotsAndBoxes(QWidget):
     def __init__(self):
         super().__init__()
+        self.bd = sqlite3.connect("tabrate.db")
         self.size_of_board = 600
         self.number_of_dots = 6
         self.symbol_size = (self.size_of_board / 3 - self.size_of_board / 8) / 2
@@ -239,8 +240,6 @@ class DotsAndBoxes(QWidget):
 
     def check_box_closed(self, box):
         # Логика для проверки, был ли квадрат закрыт
-        # Возвращайте True, если квадрат закрыт, иначе False
-        # Например, можно проверить, что все его грани заняты
         r, c = box
         return (
                 self.row_status[r][c] == 1
@@ -363,11 +362,23 @@ class DotsAndBoxes(QWidget):
         player2_score = len(np.argwhere(self.board_status == 4))
 
         if player1_score > player2_score:
+            cur = self.bd.cursor()
             text = 'Игрок 1 выиграл! '
             color = self.player1_color
+            cur.execute("""SELECT name from ezrated""")
+            pl1_last = cur.execute('SELECT name FROM ezrated ORDER BY id DESC LIMIT 1')
+            if cur.fetchone():
+                cur.execute(f"INSERT INTO ezrated VALUES ('{pl1_last}', '{player1_score}')")
+                self.bd.commit()
         elif player2_score > player1_score:
+            cur = self.bd.cursor()
             text = 'Игрок 2 Выиграл! '
             color = self.player2_color
+            cur.execute("""SELECT name from bluerate""")
+            pl2_last = cur.execute('SELECT name FROM bluerate ORDER BY id DESC LIMIT 1')
+            if cur.fetchone():
+                cur.execute(f"INSERT INTO ezrated VALUES ('{pl2_last}', '{player2_score}')")
+                self.bd.commit()
         else:
             text = 'Ничья :('
             color = 'gray'
@@ -460,12 +471,11 @@ class DotsAndBoxes(QWidget):
         return False
 
     def additional_move(self):
-        # Добавьте здесь логику для выполнения дополнительного хода
-        # Например, включите дополнительные действия или вызовите нужные методы
+        # дополнительный ход, если успею
         pass
 
     def reset_additional_move_flags(self):
-        # Сброс флагов для дополнительных ходов после их выполнения
+        # сброс флага после доп хода
         self.additional_move_condition_player1 = False
         self.additional_move_condition_player2 = False
 
