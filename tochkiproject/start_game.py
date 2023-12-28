@@ -74,7 +74,7 @@ class Players(QMainWindow):
                     cur.execute(f"INSERT INTO bluerate VALUES ('{self.lineEdit.text()}', '{0}')")
                     self.bd.commit()
                 self.gs = DotsAndBoxes()
-                self.gs.setGeometry(100, 100, self.gs.size_of_board + 100, self.gs.size_of_board + 100)
+                self.gs.setGeometry(100, 100, self.gs.board_size + 100, self.gs.board_size + 100)
                 self.gs.show()
                 self.hide()
         except Exception as e:

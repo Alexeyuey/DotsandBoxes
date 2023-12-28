@@ -10,20 +10,20 @@ class DotsAndBoxes(QWidget):
     def __init__(self):
         super().__init__()
         self.bd = sqlite3.connect("tabrate.db")
-        self.size_of_board = 600
-        self.number_of_dots = 6
-        self.symbol_size = (self.size_of_board / 3 - self.size_of_board / 8) / 2
+        self.board_size = 600
+        self.quantity_dots = 6
+        self.symbol_size = (self.board_size / 3 - self.board_size / 8) / 2
         self.dot_color = '#000000'
-        self.player1_color = '#0492CF'
-        self.player1_color_light = '#0492CF'
-        self.player2_color = '#EE4035'
-        self.player2_color_light = '#EE7E77'
+        self.player1_color = '#0000FF'
+        self.player1_color_light = '#00008B'
+        self.player2_color = '#FF0000'
+        self.player2_color_light = '#DC143C'
         self.Green_color = '#7BC043'
-        self.dot_width = 0.25 * self.size_of_board / self.number_of_dots
-        self.edge_width = 0.1 * self.size_of_board / self.number_of_dots
-        self.row_status = np.zeros((self.number_of_dots, self.number_of_dots))
-        self.col_status = np.zeros((self.number_of_dots, self.number_of_dots))
-        self.distance_between_dots = self.size_of_board / (self.number_of_dots)
+        self.dot_width = 0.25 * self.board_size / self.quantity_dots
+        self.edge_width = 0.1 * self.board_size / self.quantity_dots
+        self.row_status = np.zeros((self.quantity_dots, self.quantity_dots))
+        self.col_status = np.zeros((self.quantity_dots, self.quantity_dots))
+        self.dots_space = self.board_size / (self.quantity_dots)
         self.player1_score = 0
         self.player2_score = 0
         self.additional_move_condition_player1 = False
@@ -54,13 +54,13 @@ class DotsAndBoxes(QWidget):
 
         self.setLayout(layout)
 
-        self.playAgain()
+        self.replay()
 
-    def playAgain(self):
+    def replay(self):
         self.refreshBoard()
-        self.board_status = np.zeros(shape = (self.number_of_dots - 1, self.number_of_dots - 1))
-        self.row_status = np.zeros(shape = (self.number_of_dots, self.number_of_dots))
-        self.col_status = np.zeros(shape = (self.number_of_dots, self.number_of_dots))
+        self.board_status = np.zeros(shape = (self.quantity_dots - 1, self.quantity_dots - 1))
+        self.row_status = np.zeros(shape = (self.quantity_dots, self.quantity_dots))
+        self.col_status = np.zeros(shape = (self.quantity_dots, self.quantity_dots))
 
         self.player1_starts = not self.player1_starts
         self.player1_turn = not self.player1_starts
@@ -68,17 +68,17 @@ class DotsAndBoxes(QWidget):
         self.turntext_handle = []
 
         self.already_marked_boxes = []
-        self.display_turn_text()
+        self.screen_motion()
 
         self.already_marked_boxes = []
-        self.display_turn_text()
+        self.screen_motion()
 
     def is_grid_occupied(self, logical_position, type):
         r = logical_position[0]
         c = logical_position[1]
         occupied = True
 
-        if 0 <= c < self.number_of_dots and 0 <= r < self.number_of_dots:
+        if 0 <= c < self.quantity_dots and 0 <= r < self.quantity_dots:
             if type == 'row' and self.row_status[c][r] == 0:
                 occupied = False
             elif type == 'col' and self.col_status[c][r] == 0:
@@ -88,11 +88,11 @@ class DotsAndBoxes(QWidget):
 
     def convert_grid_to_logical_position(self, grid_position):
         grid_position = np.array(grid_position)
-        position = (grid_position - self.distance_between_dots / 4) // (self.distance_between_dots / 2)
+        position = (grid_position - self.dots_space / 4) // (self.dots_space / 2)
 
         type = False
         logical_position = []
-        if 0 <= position[1] < self.number_of_dots * 2 - 1 and 0 <= position[0] < self.number_of_dots * 2 - 1:
+        if 0 <= position[1] < self.quantity_dots * 2 - 1 and 0 <= position[0] < self.quantity_dots * 2 - 1:
             if position[1] % 2 == 0 and (position[0] - 1) % 2 == 0:
                 r = int((position[0] - 1) // 2)
                 c = int(position[1] // 2)
@@ -126,7 +126,7 @@ class DotsAndBoxes(QWidget):
 
                 # Проверка, был ли закрыт квадрат и начисление очка
                 if self.check_box_closed(box):
-                    self.player1_score += 1  # Игрок 1 получил очко
+                    self.player1_score += 1
                     self.additional_move_condition_player1 = True  # Установка флага для дополнительного хода
 
         boxes = np.argwhere(self.board_status == 4)
@@ -138,16 +138,16 @@ class DotsAndBoxes(QWidget):
 
                 if self.check_box_closed(box):
                     if self.player1_turn:
-                        self.player1_score += 1  # Игрок 1 получил очко
+                        self.player1_score += 1
                         self.additional_move_condition_player1 = True  # Установка флага для дополнительного хода
                     else:
-                        self.player2_score += 1  # Игрок 2 получил очко
+                        self.player2_score += 1
                         self.additional_move_condition_player2 = True  # Установка флага для дополнительного хода
 
                         # Проверка, был ли последний закрытый квадрат
                         if self.is_last_box_closed():
                             self.player1_turn = not self.player1_turn  # Смена хода после последнего закрытого квадрата
-                            self.display_turn_text()  # Обновление отображения текущего хода
+                            self.screen_motion()  # Обновление отображения текущего хода
 
                             # Определение координат последнего закрытого квадрата
                             last_closed_box_coords = self.get_last_closed_box_coords()
@@ -174,22 +174,22 @@ class DotsAndBoxes(QWidget):
         if self.player1_turn:
             val = -1
 
-        if c < (self.number_of_dots - 1) and r < (self.number_of_dots - 1):
+        if c < (self.quantity_dots - 1) and r < (self.quantity_dots - 1):
             self.board_status[c][r] += val
 
         if type == 'row':
             self.row_status[c][r] = 1
-            if c >= 1 and r < (self.number_of_dots - 1):
+            if c >= 1 and r < (self.quantity_dots - 1):
                 self.board_status[c - 1][r] += val
 
         elif type == 'col':
             self.col_status[c][r] = 1
-            if r >= 1 and c < (self.number_of_dots - 1):
+            if r >= 1 and c < (self.quantity_dots - 1):
                 self.board_status[c][r - 1] += val
 
     def is_gameover(self):
-        for i in range(self.number_of_dots - 1):
-            for j in range(self.number_of_dots - 1):
+        for i in range(self.quantity_dots - 1):
+            for j in range(self.quantity_dots - 1):
                 if (
                         self.row_status[i][j] == 0
                         or self.col_status[i][j] == 0
@@ -201,14 +201,14 @@ class DotsAndBoxes(QWidget):
 
     def make_edge(self, type, logical_position):
         if type == 'row':
-            start_x = self.distance_between_dots / 2 + logical_position[0] * self.distance_between_dots
-            end_x = start_x + self.distance_between_dots
-            start_y = self.distance_between_dots / 2 + logical_position[1] * self.distance_between_dots
+            start_x = self.dots_space / 2 + logical_position[0] * self.dots_space
+            end_x = start_x + self.dots_space
+            start_y = self.dots_space / 2 + logical_position[1] * self.dots_space
             end_y = start_y
         elif type == 'col':
-            start_y = self.distance_between_dots / 2 + logical_position[1] * self.distance_between_dots
-            end_y = start_y + self.distance_between_dots
-            start_x = self.distance_between_dots / 2 + logical_position[0] * self.distance_between_dots
+            start_y = self.dots_space / 2 + logical_position[1] * self.dots_space
+            end_y = start_y + self.dots_space
+            start_x = self.dots_space / 2 + logical_position[0] * self.dots_space
             end_x = start_x
 
         if self.player1_turn:
@@ -234,7 +234,7 @@ class DotsAndBoxes(QWidget):
             text = 'Игрок 1 выиграл! '
             color = self.player1_color
             cur.execute("""SELECT name from ezrated""")
-            pl1_last = cur.execute('SELECT name FROM ezrated ORDER BY id DESC LIMIT 1')
+            pl1_last = cur.execute('SELECT * FROM ezrated ORDER BY id DESC LIMIT 1')
             if cur.fetchone():
                 cur.execute(f"INSERT INTO ezrated VALUES ('{pl1_last}', '{player1_score}')")
                 self.bd.commit()
@@ -243,7 +243,7 @@ class DotsAndBoxes(QWidget):
             text = 'Игрок 2 Выиграл! '
             color = self.player2_color
             cur.execute("""SELECT name from bluerate""")
-            pl2_last = cur.execute('SELECT name FROM bluerate ORDER BY id DESC LIMIT 1')
+            pl2_last = cur.execute('SELECT * FROM bluerate ORDER BY id DESC LIMIT 1')
             if cur.fetchone():
                 cur.execute(f"INSERT INTO ezrated VALUES ('{pl2_last}', '{player2_score}')")
                 self.bd.commit()
@@ -252,7 +252,7 @@ class DotsAndBoxes(QWidget):
             color = 'gray'
 
         self.scene.clear()
-        self.scene.addText(text, QFont('cmr', 60, QFont.Bold)).setDefaultTextColor(QColor(color))
+        self.scene.addText(text, QFont('cmr', 150, QFont.Bold)).setDefaultTextColor(QColor(color))
 
         score_text = 'Scores \n'
         self.scene.addText(score_text, QFont('cmr', 40, QFont.Bold)).setDefaultTextColor(QColor(self.Green_color))
@@ -268,27 +268,27 @@ class DotsAndBoxes(QWidget):
 
 
     def refreshBoard(self):
-        for i in range(self.number_of_dots):
-            x = i * self.distance_between_dots + self.distance_between_dots / 2
-            self.scene.addLine(x, self.distance_between_dots / 2, x,
-                               self.size_of_board - self.distance_between_dots / 2,
+        for i in range(self.quantity_dots):
+            x = i * self.dots_space + self.dots_space / 2
+            self.scene.addLine(x, self.dots_space / 2, x,
+                               self.board_size - self.dots_space / 2,
                                QPen(QColor('gray'), self.dot_width))
 
-            self.scene.addLine(self.distance_between_dots / 2, x,
-                               self.size_of_board - self.distance_between_dots / 2, x,
+            self.scene.addLine(self.dots_space / 2, x,
+                               self.board_size - self.dots_space / 2, x,
                                QPen(QColor('gray'), self.dot_width))
 
-        for i in range(self.number_of_dots):
-            for j in range(self.number_of_dots):
-                start_x = i * self.distance_between_dots + self.distance_between_dots / 2
-                end_x = j * self.distance_between_dots + self.distance_between_dots / 2
+        for i in range(self.quantity_dots):
+            for j in range(self.quantity_dots):
+                start_x = i * self.dots_space + self.dots_space / 2
+                end_x = j * self.dots_space + self.dots_space / 2
 
                 dot_item = QGraphicsEllipseItem(start_x - self.dot_width / 2, end_x - self.dot_width / 2,
                                                 self.dot_width, self.dot_width)
                 dot_item.setBrush(QColor(self.dot_color))
                 self.scene.addItem(dot_item)
 
-    def display_turn_text(self):
+    def screen_motion(self):
         text = 'Следующий ход: '
         if self.player1_turn:
             text += 'Игрок 1'
@@ -301,10 +301,10 @@ class DotsAndBoxes(QWidget):
         self.turn_label.setStyleSheet(f'color: {color}')
 
     def shade_box(self, box, color):
-        start_x = self.distance_between_dots / 2 + box[1] * self.distance_between_dots
-        start_y = self.distance_between_dots / 2 + box[0] * self.distance_between_dots
-        end_x = start_x + self.distance_between_dots
-        end_y = start_y + self.distance_between_dots
+        start_x = self.dots_space / 2 + box[1] * self.dots_space
+        start_y = self.dots_space / 2 + box[0] * self.dots_space
+        end_x = start_x + self.dots_space
+        end_y = start_y + self.dots_space
 
         box_item = QGraphicsRectItem(start_x, start_y, end_x - start_x, end_y - start_y)
         box_item.setBrush(QColor(color))
@@ -314,7 +314,7 @@ class DotsAndBoxes(QWidget):
         if not self.reset_board:
             grid_position = [event.x(), event.y()]
             logical_position, valid_input = self.convert_grid_to_logical_position(grid_position)
-            if 0 <= grid_position[0] <= self.size_of_board and 0 <= grid_position[1] <= self.size_of_board:
+            if 0 <= grid_position[0] <= self.board_size and 0 <= grid_position[1] <= self.board_size:
                 if valid_input and not self.is_grid_occupied(logical_position, valid_input):
                     self.update_board(valid_input, logical_position)
                     self.make_edge(valid_input, logical_position)
@@ -325,7 +325,7 @@ class DotsAndBoxes(QWidget):
                     if self.is_gameover():
                         self.display_gameover()
                     else:
-                        self.display_turn_text()
+                        self.screen_motion()
 
                         # Дополнительный ход при получении очка
                         if self.additional_move_condition():
@@ -361,9 +361,9 @@ class DotsAndBoxes(QWidget):
                 if self.is_gameover():
                     self.display_gameover()
                 else:
-                    self.display_turn_text()
+                    self.screen_motion()
         else:
             self.scene.clear()
-            self.playAgain()
+            self.replay()
             self.reset_board = False
 
