@@ -233,19 +233,21 @@ class DotsAndBoxes(QWidget):
             cur = self.bd.cursor()
             text = 'Игрок 1 выиграл! '
             color = self.player1_color
-            cur.execute("""SELECT name from ezrated""")
-            pl1_last = cur.execute('SELECT * FROM ezrated ORDER BY id DESC LIMIT 1')
-            if cur.fetchone():
-                cur.execute(f"INSERT INTO ezrated VALUES ('{pl1_last}', '{player1_score}')")
+            cur.execute("SELECT name, score FROM ezrated ORDER BY id DESC LIMIT 1")
+            last_entry = cur.fetchone()
+            if last_entry:
+                last_name, current_score = last_entry
+                cur.execute("UPDATE ezrated SET score = ? WHERE name = ?", (player1_score, last_name))
                 self.bd.commit()
         elif player2_score > player1_score:
             cur = self.bd.cursor()
-            text = 'Игрок 2 Выиграл! '
+            text = 'Игрок 2 выиграл! '
             color = self.player2_color
-            cur.execute("""SELECT name from bluerate""")
-            pl2_last = cur.execute('SELECT * FROM bluerate ORDER BY id DESC LIMIT 1')
-            if cur.fetchone():
-                cur.execute(f"INSERT INTO ezrated VALUES ('{pl2_last}', '{player2_score}')")
+            cur.execute("SELECT name, score FROM bluerate ORDER BY id DESC LIMIT 1")
+            last_entry = cur.fetchone()
+            if last_entry:
+                last_name, current_score = last_entry
+                cur.execute("UPDATE bluerate SET score = ? WHERE name = ?", (player2_score, last_name))
                 self.bd.commit()
         else:
             text = 'Ничья :('
@@ -265,7 +267,9 @@ class DotsAndBoxes(QWidget):
 
         score_text = 'Чтобы начать еще раз - нажмите кнопку "Играть еще раз" \n'
         self.scene.addText(score_text, QFont('cmr', 10, QFont.Bold)).setDefaultTextColor(QColor('gray'))
-
+        new_game_button = QPushButton('Играть еще раз')
+        new_game_button.clicked.connect(self.replay) 
+        self.scene.addWidget(new_game_button)
 
     def refreshBoard(self):
         for i in range(self.quantity_dots):
@@ -366,4 +370,3 @@ class DotsAndBoxes(QWidget):
             self.scene.clear()
             self.replay()
             self.reset_board = False
-
